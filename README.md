@@ -109,55 +109,120 @@ Informações importantes sobre `@ModelAttribute`:
 
 `@ModelAttribute` é uma anotação poderosa e flexível que é comumente usada em projetos Spring para passar dados do controlador para a visualização e vice-versa. Isso facilita a criação de páginas da web dinâmicas que exibem informações diretamente de objetos Java.
 
+
 # Classe `RedirectAttributes`
 
-A classe `RedirectAttributes` é parte do framework Spring MVC e é usada para passar atributos entre solicitações ao redirecionar o usuário para uma nova URL. Ela é frequentemente usada quando você deseja redirecionar o usuário após a conclusão de uma ação e, ao mesmo tempo, transmitir algumas informações, geralmente mensagens ou dados, para a próxima solicitação. Isso é especialmente útil para exibir mensagens de sucesso, validação de erros ou quaisquer outras informações relevantes após a execução de uma ação.
+A classe `RedirectAttributes` é uma parte importante do Spring Framework, frequentemente usada em aplicações da web para passar informações de um controlador para outro, principalmente ao redirecionar o usuário para diferentes páginas ou URLs após a conclusão de alguma ação.
 
-O que pode fazer com o `RedirectAttributes`:
+Principais pontos relacionados à classe `RedirectAttributes`:
 
-1. **Adicionar atributos**: Você pode usar o método `addAttribute()` para adicionar atributos que serão transmitidos para a próxima solicitação. Por exemplo, você pode adicionar uma mensagem de sucesso após a criação de um novo registro.
+1. **Propósito**: O principal objetivo do `RedirectAttributes` é permitir que você envie atributos (dados) de um controlador para outro ao redirecionar o usuário para uma nova página ou URL. Isso é útil quando você deseja passar mensagens de sucesso, informações de status ou dados relacionados ao resultado de uma operação (como uma confirmação de que um registro foi criado com sucesso) de um controlador para outro.
 
-   ```java
-   redirectAttributes.addAttribute("mensagem", "Estudante criado com sucesso!");
-   ```
+2. **Redirecionamento**: Em uma aplicação da web, muitas vezes você redireciona o usuário para diferentes páginas ou URLs em resposta a ações (por exemplo, após um envio de formulário bem-sucedido). O redirecionamento normalmente envolve o envio de uma resposta HTTP com um status 3xx e um cabeçalho "Location" para o navegador, que, por sua vez, solicita a nova página. O `RedirectAttributes` ajuda a passar informações durante esse processo.
 
-2. **Adicionar atributos flash**: A classe `RedirectAttributes` possui um método chamado `addFlashAttribute()` que permite adicionar atributos "flash". A principal diferença entre atributos normais e atributos flash é que os atributos flash sobrevivem apenas uma solicitação. Eles são geralmente usados para transmitir informações de uma solicitação para a próxima (após o redirecionamento) e, em seguida, são automaticamente removidos.
+3. **Uso com `redirect:`**: Ao usar a classe `RedirectAttributes`, você pode incluir atributos que deseja passar para a próxima solicitação de redirecionamento. Isso é frequentemente feito com a notação `"redirect:"` no valor do `return` em um método do controlador.
 
-   ```java
-   redirectAttributes.addFlashAttribute("mensagem", "Estudante criado com sucesso!");
-   ```
-
-3. **Redirecionar**: Você normalmente usará `RedirectAttributes` com o método `redirect:/algumaURL` para redirecionar o usuário para uma nova página após a conclusão da ação.
+4. **Exemplo simples de Uso**:
 
    ```java
-   return "redirect:/outraURL";
-   ```
-
-4. **Recuperar atributos após o redirecionamento**: Na próxima solicitação, você pode recuperar os atributos usando o modelo ou diretamente da solicitação. Isso permite que você exiba informações relevantes na nova página. Por exemplo, você pode acessar a mensagem de sucesso que adicionou anteriormente.
-
-   ```java
-   @GetMapping("/outraURL")
-   public String outraPagina(Model model) {
-       String mensagem = (String) model.getAttribute("mensagem");
-       // Faça algo com a mensagem na sua página
-       return "pagina";
+   @PostMapping("/salvar")
+   public String salvarAlgo(RedirectAttributes redirectAttributes) {
+       // Lógica para salvar algo
+       redirectAttributes.addFlashAttribute("mensagem", "Operação realizada com sucesso!");
+       return "redirect:/outrapagina";
    }
    ```
 
-No contexto de uma aplicação Spring MVC, o `RedirectAttributes` é uma maneira eficaz de passar informações entre ações e páginas, especialmente após a execução de operações como inserção, atualização ou exclusão de registros no banco de dados. Isso permite que os usuários vejam mensagens informativas ou de sucesso, além de manter a integridade da URL e garantir uma experiência de usuário limpa.
+   Neste exemplo, após a operação de salvar, a mensagem "Operação realizada com sucesso!" é adicionada como um atributo flash. A notação `"redirect:/outrapagina"` indica que o usuário será redirecionado para a página `/outrapagina`.
+
+5. **Flash Attributes**: A classe `RedirectAttributes` suporta o uso de atributos "flash". A diferença entre atributos flash e regulares é que os flash attributes são armazenados temporariamente e estão disponíveis apenas para a próxima solicitação. Depois disso, eles são automaticamente removidos. Isso é útil para exibir informações de sucesso ou mensagens de erro após um redirecionamento, sem a necessidade de usar sessões ou cookies.
+
+6. **Outros Métodos**: Além de `addFlashAttribute`, a classe `RedirectAttributes` oferece outros métodos para trabalhar com atributos, como `addAttribute` (para atributos regulares) e `getFlashAttributes` (para obter atributos flash).
+
+Em resumo, `RedirectAttributes` é uma classe essencial para passar informações entre controladores ao redirecionar o usuário, especialmente quando você deseja comunicar resultados ou mensagens entre diferentes partes de sua aplicação da web.
+
+
+# Interface `BindingResult`
+
+O `BindingResult` é uma interface do Spring Framework que desempenha um papel fundamental na validação e no processamento de erros em operações de ligação (binding) entre dados do formulário web e objetos Java, frequentemente usados em aplicativos da web. A principal função do `BindingResult` é armazenar informações sobre erros de validação ou conversão que ocorrem durante o processo de ligação entre os dados do formulário e os objetos de domínio.
+
+Aspectos importantes sobre a classe `BindingResult`:
+
+1. **Validação de Dados**:
+   - O `BindingResult` é frequentemente usado em conjunto com a anotação `@Valid` em parâmetros de métodos em controladores Spring, como os utilizados em operações de criação ou atualização de recursos por meio de formulários web.
+   - Ele é responsável por armazenar informações sobre os erros de validação que ocorrem durante a validação dos dados fornecidos pelos usuários.
+
+2. **Tratamento de Erros**:
+   - Quando os dados de entrada não atendem às regras de validação definidas nas anotações, o `BindingResult` armazena esses erros.
+   - O controlador pode verificar o `BindingResult` para determinar se ocorreram erros de validação.
+
+3. **Uso em Redirecionamento**:
+   - O `BindingResult` é frequentemente usado para redirecionar o usuário de volta ao formulário quando ocorrem erros de validação.
+   - Isso permite que os erros sejam apresentados ao usuário para correção.
+
+4. **Integração com Thymeleaf e Outros Motores de Modelagem**:
+   - Comumente, o `BindingResult` é usado em conjunto com motores de modelagem, como o Thymeleaf, para exibir mensagens de erro em locais apropriados nos formulários web.
+
+5. **Métodos Úteis**:
+   - A interface `BindingResult` define métodos úteis para acessar informações sobre erros, como `hasErrors()` (para verificar se há erros), `getFieldErrors()` (para obter erros de campos específicos) e `getGlobalErrors()` (para obter erros globais que não estão associados a campos específicos).
+
+6. **Uso em Erros de Conversão**:
+   - Além de erros de validação, o `BindingResult` também lida com erros de conversão de tipos de dados, como tentar converter uma string em um número inteiro.
+
+7. **Personalização de Mensagens de Erro**:
+   - O `BindingResult` permite a personalização das mensagens de erro exibidas aos usuários. As mensagens de erro podem ser especificadas nas anotações de validação no nível das classes de domínio.
+
+Em resumo, o `BindingResult` é uma ferramenta importante para processar validações e erros de conversão de dados em aplicativos da web Spring. Ele desempenha um papel crucial ao garantir que os dados fornecidos pelos usuários atendam aos critérios definidos e permite ao aplicativo fornecer feedback adequado aos usuários quando ocorrem erros de validação ou conversão.
+
+
+# Anotação `@Valid`
+
+A anotação `@Valid` é uma anotação importante em aplicações Spring que trabalham com validação de dados. Essa anotação é usada principalmente em combinação com o framework de validação do Java Bean Validation (geralmente usando anotações como `@NotNull`, `@Size`, `@Pattern`, entre outras) para validar objetos em classes controladoras (controllers) ou serviços.
+
+Conceitos-chave relacionados à anotação `@Valid`:
+
+1. **Validação de Dados**: A validação de dados é um processo crítico em qualquer aplicação para garantir que os dados inseridos ou manipulados estejam em conformidade com as regras e requisitos definidos. Isso ajuda a garantir a integridade e a qualidade dos dados.
+
+2. **Java Bean Validation**: É uma especificação Java EE que define um conjunto de anotações (como `@NotNull`, `@Size`, `@Pattern`, etc.) que podem ser usadas para marcar propriedades de classes Java (Java Beans) para validação de dados.
+
+3. **Integração com Spring**: O Spring Framework suporta a validação de dados usando a especificação Java Bean Validation. Você pode usar as anotações de validação em seus objetos de domínio e, em seguida, usar a anotação `@Valid` para acionar a validação desses objetos em suas classes controladoras.
+
+4. **Uso da Anotação `@Valid`**: Quando é aplicado a anotação `@Valid` a um parâmetro de método em um controlador, o Spring irá disparar a validação dos campos anotados em um objeto, com base nas anotações Bean Validation, antes de executar o método do controlador. Se a validação falhar, o Spring pode retornar um erro apropriado, como uma resposta HTTP 400 Bad Request, indicando que os dados de entrada são inválidos.
+
+O uso de `@Valid` simplifica a lógica de validação nos controladores, permitindo que você se concentre na lógica de negócios e mantendo as regras de validação de dados separadas dos controladores.
+
+
+# Método `hasErrors()`
+
+O método `hasErrors()` faz parte da funcionalidade de validação fornecida pelo Spring Framework e é usado para verificar se há erros de validação em um objeto. Ele é frequentemente usado em conjunto com objetos como `BindingResult` ou `Errors` após a validação ter sido executada, para determinar se ocorreram erros de validação.
+
+Como ele funciona:
+
+1. Após a validação de um objeto, como um objeto de formulário, o Spring Framework preenche um objeto `BindingResult` (ou `Errors`) com informações sobre os erros de validação.
+
+2. O método `hasErrors()` é chamado em um objeto `BindingResult` para verificar se há erros. Se houver erros, ele retorna `true`, indicando que ocorreram erros de validação. Caso contrário, retorna `false`.
+
+3. Você pode usar esse resultado para tomar decisões na lógica do seu controlador. Por exemplo, se `hasErrors()` retornar `true`, você pode redirecionar o usuário de volta ao formulário com mensagens de erro. Se retornar `false`, você pode prosseguir com o processamento do formulário.
+
+No Thymeleaf, você também pode usar `${#fields.hasErrors('campo')}` para verificar erros de campo específicos relacionados à validação e exibir mensagens de erro correspondentes na interface do usuário.
+
 
 # Passo a Passo do método de Controle gravarEstudante()
 
 ```java
 @PostMapping("/gravarEstudante")
-public String gravarEstudante(@ModelAttribute("novoEstudante") Estudante estudante,
-        RedirectAttributes redirectAttributes) {
-    
-    estudanteService.criarEstudante(estudante);
+public String gravarEstudante(@ModelAttribute("novoEstudante") @Valid Estudante estudante,
+   BindingResult erros, RedirectAttributes redirectAttributes) {
+        
+   if(erros.hasErrors()){
+       return "/novo-estudante";
+   }
 
-    redirectAttributes.addFlashAttribute("mensagem", "Estudante salvo com sucesso!");
-    
-    return "redirect:/novo";
+   estudanteService.criarEstudante(estudante);
+
+   redirectAttributes.addFlashAttribute("mensagem", "Estudante salvo com sucesso!");
+
+   return "redirect:/novo";
 }
 ```
 
@@ -165,12 +230,94 @@ public String gravarEstudante(@ModelAttribute("novoEstudante") Estudante estudan
 
 2. `public String gravarEstudante(@ModelAttribute("novoEstudante") Estudante estudante, RedirectAttributes redirectAttributes)`: Este é o método que lida com a solicitação POST. Aqui estão os parâmetros e o que eles fazem:
    - `@ModelAttribute("novoEstudante") Estudante estudante`: Este parâmetro indica que está esperando que os dados do formulário sejam vinculados a um objeto `Estudante`. O `@ModelAttribute` é usado para vincular os campos do formulário com os campos do objeto `Estudante`. O valor `"novoEstudante"` especifica o nome do modelo usado no formulário para referenciar este objeto.
+   - O `@Valid` indica que a validação do objeto deve ser aplicada.
    - `RedirectAttributes redirectAttributes`: Isso é usado para passar atributos entre solicitações ao redirecionar o usuário para uma nova URL. Ele permite que você adicione atributos para transmiti-los para a próxima solicitação após o redirecionamento.
+   - O `BindingResult` é usado para capturar erros de validação. Se ocorrerem erros de validação no objeto Estudante, eles serão capturados neste objeto. Se houver erros de validação, o método pode decidir como lidar com eles.
 
-3. `estudanteService.criarEstudante(estudante)`: Esta linha chama um serviço (presumivelmente `estudanteService`) para criar um novo estudante. Os dados do estudante são extraídos do objeto `estudante` que foi vinculado ao formulário.
+3. `if(erros.hasErrors())`: Esta linha verifica se o objeto erros contém erros de validação. Se houver erros, o método retorna "/novo-estudante", o que provavelmente redireciona o usuário de volta para a página de criação de estudantes com mensagens de erro.
 
-4. `redirectAttributes.addFlashAttribute("mensagem", "Estudante salvo com sucesso!")`: Aqui, está usando o `RedirectAttributes` para adicionar um atributo "flash" chamado "mensagem". Esse atributo contém uma mensagem que será exibida na próxima solicitação, em uma página que o usuário será redirecionado após a criação bem-sucedida do estudante. A principal diferença entre um atributo flash e um atributo normal é que os atributos flash são automaticamente removidos após a próxima solicitação. Portanto, a mensagem só será exibida uma vez após o redirecionamento.
+4. `estudanteService.criarEstudante(estudante)`: Esta linha chama um serviço (presumivelmente `estudanteService`) para criar um novo estudante. Os dados do estudante são extraídos do objeto `estudante` que foi vinculado ao formulário.
 
-5. `return "redirect:/novo"`: Finalmente, esta linha redireciona o usuário para a URL `/novo` após a conclusão bem-sucedida da criação do estudante. Isso é feito usando o `"redirect:"` antes da URL, o que instrui o Spring MVC a redirecionar o usuário para a página correspondente.
+5. `redirectAttributes.addFlashAttribute("mensagem", "Estudante salvo com sucesso!")`: Aqui, está usando o `RedirectAttributes` para adicionar um atributo "flash" chamado "mensagem". Esse atributo contém uma mensagem que será exibida na próxima solicitação, em uma página que o usuário será redirecionado após a criação bem-sucedida do estudante. A principal diferença entre um atributo flash e um atributo normal é que os atributos flash são automaticamente removidos após a próxima solicitação. Portanto, a mensagem só será exibida uma vez após o redirecionamento.
+
+6. `return "redirect:/novo"`: Finalmente, esta linha redireciona o usuário para a URL `/novo` após a conclusão bem-sucedida da criação do estudante. Isso é feito usando o `"redirect:"` antes da URL, o que instrui o Spring MVC a redirecionar o usuário para a página correspondente.
 
 No geral, esse método é usado para processar a criação de um novo estudante, exibe uma mensagem de sucesso após o redirecionamento para a próxima página e usa o atributo flash para transmitir a mensagem entre as solicitações.
+
+## Bom Saber - validando dados de uma entidade usando Java Bean Validation
+
+### 1. **Anotações de Validação na Classe Estudante:**
+
+```java
+public class Estudante {
+
+   ...
+
+   @NotBlank(message = "O nome deve ser informado")
+   @Size(min = 2, message = "O nome deve ter no mínimo dois caracteres")
+   private String nome;
+
+   @Min(value = 18, message = "O estudante deve ter no mínimo 18 anos de idade")
+   private int idade;
+}
+```
+
+Neste trecho, a classe `Estudante` contém campos `nome` e `idade`, e essas anotações são usadas para definir regras de validação:
+
+- `@NotBlank` garante que o campo `nome` não deve estar em branco (nulo ou vazio). Se estiver em branco, a mensagem de erro "O nome deve ser informado" será exibida.
+
+- `@Size(min = 2)` estabelece que o campo `nome` deve ter um tamanho mínimo de 2 caracteres. Se o nome tiver menos de 2 caracteres, a mensagem de erro "O nome deve ter no mínimo dois caracteres" será exibida.
+
+- `@Min(value = 18)` valida se o campo `idade` é maior ou igual a 18. Se a idade for menor que 18, a mensagem de erro "O estudante deve ter no mínimo 18 anos de idade" será exibida.
+
+### 2. **Método `gravarEstudante` no Controlador:**
+
+```java
+@PostMapping("/gravarEstudante")
+public String gravarEstudante(@ModelAttribute("novoEstudante") @Valid Estudante estudante,
+        BindingResult erros, RedirectAttributes redirectAttributes) {
+    
+    if (erros.hasErrors()) {
+        return "/novo-estudante";
+    }
+    
+    ...
+}
+```
+
+- `@Valid` é usado na entrada do método para indicar que o objeto `Estudante` deve ser validado de acordo com as regras de validação definidas nas anotações em sua classe.
+
+- `BindingResult erros` é usado para coletar os erros de validação após a validação ter sido executada. Se houver erros, eles serão registrados em `erros`.
+
+- A condição `if (erros.hasErrors())` verifica se existem erros de validação. Se houver erros, o código retorna `/novo-estudante`, levando o usuário de volta ao formulário para corrigir os erros.
+
+### 3. **Formulário Thymeleaf:**
+
+```html
+
+<form th:object="${novoEstudante}" method="post">
+    <!-- Restante do formulário -->
+
+    <div class="mb-3" th:if="${#fields.hasErrors('nome')}">
+        <span th:each="error : ${#fields.errors('nome')}" class="alert alert-danger" role="alert" th:text="${error}"></span>
+    </div>
+    
+    <!-- Restante do formulário -->
+    
+    <div class="mb-3">
+         <span th:if="${#fields.hasErrors('idade')}" th:errors="*{idade}" class="alert alert-danger" role="alert"></span>
+    </div>
+
+     <!-- Restante do formulário -->
+</form>
+```
+
+- No formulário Thymeleaf está verificando se há erros no campo nome usando `${#fields.hasErrors('nome')}`. Ou seja, essa parte `th:if="${#fields.hasErrors('nome')}"` é uma expressão Thymeleaf. Ela verifica se existem erros de validação no campo nome. Se houver erros, esta divisão é exibida; caso contrário, ela não é renderizada.
+
+- A tag `<span>` é usada para exibir mensagens de erro.
+
+- Essa parte `th:each="error : ${#fields.errors('nome')}"` é uma expressão Thymeleaf que faz um loop por todas as mensagens de erro associadas ao campo nome. Ou seja, se houver erros no campo nome irá iterar os erros e exibir como mensagens de erro em um elemento HTML com a classe `alert alert-danger.`
+
+- A tag `<span>` é usada para exibir mensagens de erro. `th:if="${#fields.hasErrors('idade')}"` verifica se há erros no campo `idade`. Se houver erros, as mensagens de erro associadas a `idade` serão exibidas com `th:errors="*{idade}"`.
+
+Isso permite que o Thymeleaf exiba mensagens de erro no local apropriado do formulário, dependendo das regras de validação definidas nas anotações da classe `Estudante` e das mensagens de erro personalizadas especificadas nas anotações. O código no controlador usa `BindingResult` para capturar os erros e decidir se deve redirecionar o usuário de volta ao formulário ou prosseguir com o processamento, dependendo da validação.
