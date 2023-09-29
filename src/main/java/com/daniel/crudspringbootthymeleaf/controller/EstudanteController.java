@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,7 +28,7 @@ public class EstudanteController {
     private EstudanteService estudanteService;
 
     // Acessar Aplicação - http://localhost:8080/
-    
+
     @GetMapping("/")
     public String listarEstudantes(Model model) {
         
@@ -106,4 +107,14 @@ public class EstudanteController {
         return "redirect:/";
     }
 
+
+    @PostMapping("/buscar")
+    public String buscarEstudantes(Model model, @Param("nome") String nome) {	
+		if (nome == null) {
+			return "redirect:/";
+		}
+		List<Estudante> estudantes = estudanteService.listarTodosEstudantesPorNome(nome);
+		model.addAttribute("listarEstudantes",estudantes);
+		return "/lista-estudantes";
+    }
 }

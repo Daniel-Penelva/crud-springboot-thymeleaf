@@ -629,3 +629,103 @@ public String editarEstudante(@PathVariable("id") Long id, @ModelAttribute("edit
 - `return "redirect:/"`: Após a edição bem-sucedida, o método redireciona o usuário de volta à página principal do aplicativo.
 
 Em resumo, esse script trata da edição de um estudante. Se houver erros de validação, o usuário será redirecionado de volta ao formulário de edição para corrigi-los. Caso contrário, as alterações serão salvas e o usuário será redirecionado para a página principal.
+
+
+# Anotação `@Param`
+
+A anotação `@Param` não faz parte do Spring Framework ou do Java em si. Em vez disso, ela é uma anotação que é frequentemente usada em sistemas baseados em MyBatis, que é um framework de persistência de dados em Java. 
+
+A anotação `@Param` é usada para mapear os parâmetros que você deseja passar para uma consulta SQL definida em um arquivo XML ou anotações MyBatis.
+
+Exemplo simples de uso:
+
+Suponha que você tenha um arquivo XML de mapeamento MyBatis com uma consulta SQL que deseja executar, como:
+
+```xml
+<select id="selectByFirstName" resultType="User">
+  SELECT * FROM users WHERE first_name = #{firstName}
+</select>
+```
+
+Aqui, `#{firstName}` é um espaço reservado para um parâmetro chamado `firstName`. Você pode usar a anotação `@Param` para mapear um valor para esse parâmetro:
+
+```java
+public User selectByFirstName(@Param("firstName") String firstName);
+```
+
+Neste exemplo, `@Param("firstName")` é usado para mapear o parâmetro `firstName` do método para o espaço reservado `#{firstName}` na consulta SQL definida no arquivo XML.
+
+Em resumo, `@Param` é uma anotação específica do MyBatis que permite que você especifique explicitamente o nome do parâmetro que deve ser usado em uma consulta SQL. Isso é útil quando você tem métodos com vários parâmetros e deseja tornar claro qual valor deve ser usado para preencher um espaço reservado específico na consulta.
+
+
+# Implementando Buscar Estudante por nome
+
+### Passo 1 - Criado o método findByNomeContainingIgnoreCase() na Interface EstudanteRepository
+
+Primeiro vai ser criado um  método de consulta personalizado em uma interface de repositório Spring Data JPA. 
+
+```java
+List<Estudante> findByNomeContainingIgnoreCase(String nome);
+```
+
+1. `List<Estudante>`: Isso define o tipo de retorno do método. Neste caso, o método retornará uma lista de objetos `Estudante`.
+
+2. `findByNomeContainingIgnoreCase`: Isso é o nome do método de consulta. Spring Data JPA usa uma convenção de nomenclatura para criar consultas automaticamente. Neste caso, o método foi nomeado para realizar uma consulta que busca entidades do tipo `Estudante` onde o campo `nome` contenha (ou seja, inclua) a sequência de caracteres especificada. O "IgnoreCase" no final da consulta significa que a pesquisa deve ser feita sem distinção entre maiúsculas e minúsculas, tornando a consulta case-insensitive.
+
+3. `(String nome)`: Isso define um parâmetro que você pode passar para a consulta. Neste caso, `nome` é o parâmetro que representa a sequência de caracteres que você deseja pesquisar.
+
+Em resumo, este método `findByNomeContainingIgnoreCase` permite pesquisar entidades da classe `Estudante` no banco de dados onde o campo `nome` contém uma sequência de caracteres específica, independentemente de diferenças entre maiúsculas e minúsculas, e retorna uma lista dos resultados correspondentes.
+
+Quando você chama esse método em um repositório Spring Data JPA, o Spring irá gerar automaticamente a consulta SQL necessária para realizar a pesquisa com base no nome do método e nos parâmetros fornecidos, facilitando a recuperação dos dados do banco de dados.
+
+### Passo 2 - Criado o método listarTodosEstudantesPorNome() na Classe EstudanteService
+
+Segundo passo criar um método de serviço  que faça uso do repositório para buscar uma lista de estudantes com base em um nome especificado.
+
+```java
+public List<Estudante> listarTodosEstudantesPorNome(String nome){
+   return estudanteRepository.findByNomeContainingIgnoreCase(nome);
+}
+```
+
+1. `public List<Estudante>`: Este método retorna uma lista de objetos da classe `Estudante`.
+
+2. `listarTodosEstudantesPorNome(String nome)`: Este é o nome do método. Ele sugere que o método é usado para listar todos os estudantes cujo nome corresponde ao valor fornecido no parâmetro `nome`.
+
+3. `return estudanteRepository.findyByNomeContainingIgnoreCase(nome);`: Este é o corpo do método. Ele usa um repositório Spring Data JPA (`estudanteRepository`) para executar a consulta. Nesse caso, ele chama o método `findyByNomeContainingIgnoreCase(nome)` do repositório, passando o parâmetro `nome`. Essa consulta busca todos os estudantes cujo campo `nome` contenha o valor `nome`, ignorando diferenças entre letras maiúsculas e minúsculas, se houver alguma. A consulta se baseia no método definido no repositório que discutimos anteriormente.
+
+Portanto, esse método do serviço é uma forma de buscar estudantes com base em um nome específico, e ele faz isso chamando o repositório para executar uma consulta definida pelo Spring Data JPA. A lista resultante de estudantes é retornada pelo método. Isso é útil para buscar estudantes por nome em um serviço.
+
+### Passo 3 - Criado o método buscarEstudantes() na Classe EstudanteController
+
+Terceiro passo é criar o método de controle onde será solicitado o HTTP POST quando a URL "/buscar" é acessada para pesquisar estudante(s).
+
+```java
+@PostMapping("/buscar")
+public String buscarEstudantes(Model model, @Param("nome") String nome) {	
+	if (nome == null) {
+		return "redirect:/";
+	}
+	
+   List<Estudante> estudantes = estudanteService.listarTodosEstudantesPorNome(nome);
+	model.addAttribute("listarEstudantes",estudantes);
+	return "/lista-estudantes";
+}
+
+```
+
+1. `@PostMapping("/buscar")`: Esta anotação `@PostMapping` indica que este método deve ser acionado quando uma solicitação HTTP POST for feita para a URL "/buscar". Isso significa que este método é executado quando um formulário HTML é enviado com um método POST para "/buscar".
+
+2. `public String buscarEstudantes(Model model, @Param("nome") String nome)`: Este é o método que lida com a solicitação. Ele aceita dois parâmetros:
+   - `Model model`: O parâmetro `Model` é usado para adicionar atributos que podem ser usados na visualização (no seu caso, uma página Thymeleaf).
+   - `@Param("nome") String nome`: O parâmetro `@Param("nome")` é usado para receber o valor do campo de entrada chamado "nome" no formulário HTML. Esse valor é passado do formulário para o método quando o formulário é enviado.
+
+3. `if (nome == null) { return "redirect:/"; }`: Este bloco condicional verifica se o parâmetro "nome" é nulo. Se for nulo, significa que o formulário foi enviado sem um valor para "nome". Nesse caso, o método retorna uma resposta de redirecionamento para a página inicial, ou seja, o usuário é redirecionado para a página inicial do aplicativo.
+
+4. `List<Estudante> estudantes = estudanteService.listarTodosEstudantesPorNome(nome);`: Se o parâmetro "nome" não for nulo, o método chama o serviço `estudanteService` para buscar uma lista de estudantes com base no nome fornecido. A lista de estudantes é armazenada na variável `estudantes`.
+
+5. `model.addAttribute("listarEstudantes", estudantes);`: A lista de estudantes é adicionada ao modelo usando o nome "listarEstudantes". Isso torna os resultados da pesquisa disponíveis para a visualização Thymeleaf.
+
+6. `return "/lista-estudantes";`: Finalmente, o método retorna uma string que é interpretada como o nome da visualização (página HTML) que deve ser exibida após o processamento. Nesse caso, a visualização "lista-estudantes" será renderizada para mostrar os resultados da pesquisa.
+
+Resumindo, este método é responsável por receber um nome de pesquisa de um formulário HTML, pesquisar estudantes com base nesse nome usando o serviço `estudanteService`, adicionar a lista de estudantes aos atributos do modelo e, em seguida, retornar a visualização "lista-estudantes" para exibir os resultados da pesquisa. Se o nome não for fornecido (ou seja, for nulo), o usuário é redirecionado para a página inicial.

@@ -22,6 +22,20 @@
             </div>
         </div>
 
+        <div class="row">
+          <div class="col-sm-5">
+            <h3>Pesquisar Estudante</h3>
+            <form th:action="@{/buscar}" method="post">
+              <div class="input-group">
+                <input type="text" class="form-control" name="nome" /> <input
+                  class="btn btn-primary" type="submit" value="Buscar" /> 
+                <a th:href="@{/}" class="btn btn-danger" type="submit">Cancelar </a>
+              </div>
+            </form>
+          </div>
+        </div>
+    
+
         <br />
 
         <hr width="100%">

@@ -47,4 +47,8 @@ public class EstudanteService {
     public Estudante alterarEstudante(Estudante estudante){
         return estudanteRepository.save(estudante);
     }
+
+    public List<Estudante> listarTodosEstudantesPorNome(String nome){
+        return estudanteRepository.findByNomeContainingIgnoreCase(nome);
+    }
 }
