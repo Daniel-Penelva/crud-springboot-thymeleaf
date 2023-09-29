@@ -21,6 +21,39 @@
                 <a th:href="@{/novo}" class="btn btn-primary">NOVO ESTUDANTE</a>
             </div>
         </div>
+
+        <br />
+
+        <hr width="100%">
+
+        <br />
+
+        <h1>Lista de Estudantes</h1>
+
+        <br />
+        
+        <div class="row" style="padding-bottom: 30px;">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Idade</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:if="${listarEstudantes.empty}">
+                <td colspan="3">Não existe estudantes</td>
+              </tr>
+
+              <tr th:each="estudante : ${listarEstudantes}">
+                <td><span th:text="${estudante.id}"></span></td>
+                <td><span th:text="${estudante.nome}"></span></td>
+                <td><span th:text="${estudante.idade}"></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
     </div>
 
     <!-- Adicionando Bootstrap Javascript -->

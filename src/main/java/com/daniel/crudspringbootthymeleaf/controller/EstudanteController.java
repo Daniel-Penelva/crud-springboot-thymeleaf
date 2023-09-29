@@ -1,5 +1,7 @@
 package com.daniel.crudspringbootthymeleaf.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
@@ -22,7 +24,12 @@ public class EstudanteController {
     private EstudanteService estudanteService;
 
     @GetMapping("/")
-    public String listarEstudantes() {
+    public String listarEstudantes(Model model) {
+        
+        List<Estudante> estudantes = estudanteService.listarTodosEstudantes();
+        
+        model.addAttribute("listarEstudantes", estudantes);
+        
         return "/lista-estudantes";
     }
 

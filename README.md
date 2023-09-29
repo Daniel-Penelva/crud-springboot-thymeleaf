@@ -321,3 +321,67 @@ public String gravarEstudante(@ModelAttribute("novoEstudante") @Valid Estudante 
 - A tag `<span>` é usada para exibir mensagens de erro. `th:if="${#fields.hasErrors('idade')}"` verifica se há erros no campo `idade`. Se houver erros, as mensagens de erro associadas a `idade` serão exibidas com `th:errors="*{idade}"`.
 
 Isso permite que o Thymeleaf exiba mensagens de erro no local apropriado do formulário, dependendo das regras de validação definidas nas anotações da classe `Estudante` e das mensagens de erro personalizadas especificadas nas anotações. O código no controlador usa `BindingResult` para capturar os erros e decidir se deve redirecionar o usuário de volta ao formulário ou prosseguir com o processamento, dependendo da validação.
+
+# Passo a Passo do método de Controle listarEstudantes()
+
+```java
+@GetMapping("/")
+public String listarEstudantes(Model model) {
+    
+    List<Estudante> estudantes = estudanteService.listarTodosEstudantes();
+    
+    model.addAttribute("listarEstudantes", estudantes);
+    
+    return "/lista-estudantes";
+}
+```
+
+- `@GetMapping("/")`: Esta anotação mapeia solicitações HTTP GET para a URL raiz ("/"). Quando alguém acessa a raiz do seu aplicativo no navegador, essa função será executada.
+
+- `public String listarEstudantes(Model model)`: Esta é a definição de um método que lida com a solicitação. Ele recebe um objeto `Model` como um parâmetro. O objeto `Model` é usado para adicionar dados que serão usados ao renderizar a página.
+
+- `List<Estudante> estudantes = estudanteService.listarTodosEstudantes()`: Aqui, a função chama o serviço `estudanteService` para obter uma lista de estudantes. O objetivo é buscar todos os estudantes para exibi-los na página.
+
+- `model.addAttribute("listarEstudantes", estudantes)`: O método `addAttribute` do objeto `Model` é usado para adicionar um atributo chamado "listarEstudantes" ao modelo. Esse atributo contém a lista de estudantes que foi obtida do serviço.
+
+- `return "/lista-estudantes"`: Finalmente, o método retorna uma string que é o nome da visualização que deve ser usada para renderizar a página. Neste caso, ele retorna "/lista-estudantes", que provavelmente é um modelo Thymeleaf chamado "lista-estudantes". Isso significa que quando o método for concluído, a página "lista-estudantes" será exibida no navegador, e os dados serão preenchidos com a lista de estudantes.
+
+Portanto, esse método é responsável por listar todos os estudantes e exibi-los na página principal do seu aplicativo quando você acessa a URL raiz. A lista de estudantes é passada para a página por meio do objeto `Model`.
+
+## Bom Saber - listando os dados dos estudantes na tabela HTML
+
+```html
+<!-- Restante do formulário -->
+<tbody>
+   <tr th:if="${listarEstudantes.empty}">
+      <td colspan="3">Não existe estudantes</td>
+   </tr>
+
+   <tr th:each="estudante : ${listarEstudantes}">
+      <td><span th:text="${estudante.id}"></span></td>
+      <td><span th:text="${estudante.nome}"></span></td>
+      <td><span th:text="${estudante.idade}"></span></td>
+   </tr>
+</tbody>
+<!-- Restante do formulário -->
+```
+
+O trecho de código HTML acima está associado ao método `listarEstudantes`.
+
+1. No seu método `listarEstudantes`:
+
+   - Aqui, está recuperando uma lista de estudantes do serviço e a adicionando ao modelo com o nome "listarEstudantes".
+
+2. No trecho de código HTML:
+
+   - `<tr th:if="${listarEstudantes.empty}">`: Esta linha verifica se a lista "listarEstudantes" está vazia. Se a lista estiver vazia, ou seja, não há estudantes para listar, ela exibirá a mensagem "Não existe estudantes" em uma única célula da tabela.
+
+   - `<tr th:each="estudante : ${listarEstudantes}">`: Esta linha é usada em conjunto com a diretiva `th:each` para iterar sobre a lista "listarEstudantes" e exibir informações de cada estudante em uma linha da tabela.
+
+   - `<td><span th:text="${estudante.id}"></span></td>`: Aqui, está extraindo a propriedade "id" de cada estudante na lista e exibindo-a na primeira coluna da tabela.
+
+   - `<td><span th:text="${estudante.nome}"></span></td>`: Da mesma forma, está extraindo a propriedade "nome" de cada estudante e exibindo-a na segunda coluna da tabela.
+
+   - `<td><span th:text="${estudante.idade}"></span></td>`: Novamente, está extraindo a propriedade "idade" de cada estudante e exibindo-a na terceira coluna da tabela.
+
+Em resumo, o trecho de código HTML fornecido percorre a lista de estudantes obtida no método `listarEstudantes` e exibe as informações dos estudantes em uma tabela na página. Se a lista estiver vazia, ele exibirá uma mensagem indicando que não há estudantes. Caso contrário, ele preencherá a tabela com os detalhes de cada estudante na lista.

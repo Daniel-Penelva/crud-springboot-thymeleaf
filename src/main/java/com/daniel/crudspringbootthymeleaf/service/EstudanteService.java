@@ -1,5 +1,7 @@
 package com.daniel.crudspringbootthymeleaf.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.daniel.crudspringbootthymeleaf.model.Estudante;
@@ -17,8 +19,7 @@ public class EstudanteService {
         return estudanteRepository.save(estudante);
     }
 
-    
-
-
-    
+    public List<Estudante> listarTodosEstudantes(){
+        return estudanteRepository.findAll();
+    }
 }
