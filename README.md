@@ -368,7 +368,7 @@ Portanto, esse método é responsável por listar todos os estudantes e exibi-lo
 
 O trecho de código HTML acima está associado ao método `listarEstudantes`.
 
-1. No seu método `listarEstudantes`:
+1. No método `listarEstudantes`:
 
    - Aqui, está recuperando uma lista de estudantes do serviço e a adicionando ao modelo com o nome "listarEstudantes".
 
@@ -385,3 +385,150 @@ O trecho de código HTML acima está associado ao método `listarEstudantes`.
    - `<td><span th:text="${estudante.idade}"></span></td>`: Novamente, está extraindo a propriedade "idade" de cada estudante e exibindo-a na terceira coluna da tabela.
 
 Em resumo, o trecho de código HTML fornecido percorre a lista de estudantes obtida no método `listarEstudantes` e exibe as informações dos estudantes em uma tabela na página. Se a lista estiver vazia, ele exibirá uma mensagem indicando que não há estudantes. Caso contrário, ele preencherá a tabela com os detalhes de cada estudante na lista.
+
+Classe `Optional`
+
+A classe `Optional` faz parte do Java e foi introduzida nas versões mais recentes (Java 8) para ajudar a lidar com valores opcionais ou nulos de maneira mais segura e funcional. Ela é uma parte importante das bibliotecas de programação funcional introduzidas no Java. 
+
+Principais pontos sobre a classe `Optional`:
+
+1. **Lida com valores possivelmente nulos:** O objetivo principal do `Optional` é fornecer uma maneira de trabalhar com valores que podem ser nulos sem expor o código a possíveis `NullPointerException`. Isso torna o código mais seguro.
+
+2. **API funcional:** O `Optional` fornece uma série de métodos funcionais que permitem realizar operações em valores opcionais, como mapeamento, filtragem, ações condicionais, entre outros.
+
+3. **Criação de Optionals:** Você pode criar um `Optional` a partir de um valor não nulo usando o método `of`, ou a partir de um valor que pode ser nulo usando o método `ofNullable`. Além disso, existem outros métodos para criar Optionals vazios.
+
+   Exemplo:
+   ```java
+   Optional<String> optionalWithValue = Optional.of("valor não nulo");
+   Optional<String> optionalWithNullableValue = Optional.ofNullable(null); // Cria um Optional vazio
+   ```
+
+4. **Métodos de consulta:** Você pode verificar a presença de um valor dentro do `Optional` usando o método `isPresent`. Para obter o valor contido, você pode usar `get`. No entanto, é mais seguro usar métodos como `ifPresent` ou `orElse` para evitar `NullPointerException`.
+
+   Exemplo:
+   ```java
+   if (optional.isPresent()) {
+       String valor = optional.get();
+   }
+   ```
+
+5. **Métodos de ação condicional:** Os métodos como `ifPresent` permitem executar ações quando o valor está presente. Isso é útil para realizar ações somente se o valor existir.
+
+   Exemplo:
+   ```java
+   optional.ifPresent(valor -> System.out.println("Valor presente: " + valor));
+   ```
+
+6. **Mapeamento e filtragem:** Você pode usar métodos como `map` e `filter` para transformar o valor ou filtrá-lo com base em alguma condição.
+
+   Exemplo:
+   ```java
+   Optional<Integer> resultado = optional.map(valor -> valor.length()); // Mapeia o valor para o comprimento da string
+   ```
+
+7. **Recuperação segura de valores padrão:** O método `orElse` permite recuperar um valor padrão caso o `Optional` seja vazio.
+
+   Exemplo:
+   ```java
+   String valor = optional.orElse("Valor padrão");
+   ```
+
+8. **Evitar exceções:** O uso de `Optional` pode ajudar a evitar exceções `NullPointerException`, uma vez que você opera de maneira segura com valores nulos.
+
+Em resumo, a classe `Optional` é uma ferramenta valiosa para lidar com valores possivelmente nulos de maneira segura e funcional no Java. Ela é amplamente usada em programação moderna e é especialmente útil em operações de stream e em situações em que valores nulos podem ser problemáticos.
+
+# Implementando o Delete Estudante
+
+### Passo 1 - Criado o método buscarEstudantePorId() na Classe EstudanteService
+
+Primeiro tem que criar um método que busque o estudante por id em um repositório (`findById`).
+
+```java
+public Estudante buscarEstudantePorId(Long id) throws EstudanteNotFoundException{
+   Optional<Estudante> optional = estudanteRepository.findById(id);
+
+   if(optional.isPresent()){
+       return optional.get();
+   }else{
+       throw new EstudanteNotFoundException("Estudante com id " + id + " não encontrado!");
+   }
+}
+```
+
+1. `public Estudante buscarEstudantePorId(Long id) throws EstudanteNotFoundException {`
+   - O método `buscarEstudantePorId` recebe um parâmetro `id` do tipo `Long` que representa o identificador do estudante que se deseja encontrar. Ele também declara que pode lançar uma exceção `EstudanteNotFoundException`.
+
+2. `Optional<Estudante> optional = estudanteRepository.findById(id);`
+   - Um objeto `Optional` é criado. `Optional` é usado aqui porque o resultado da operação de busca pode ou não encontrar um estudante com o ID fornecido. O método `findById` que é fornecido por um repositório JPA, e ele retorna um `Optional` contendo o estudante se encontrado ou vazio se não encontrado.
+
+3. `if (optional.isPresent()) {`
+   - Verifica se o `Optional` contém um valor, ou seja, se um estudante com o ID fornecido foi encontrado.
+
+4. `return optional.get();`
+   - Se o estudante for encontrado (ou seja, o `Optional` contiver um valor), o método `get()` é chamado no `Optional` para obter o objeto `Estudante` encontrado, que é então retornado pelo método.
+
+5. `} else {`
+   - Se o `Optional` estiver vazio, isso significa que o estudante não foi encontrado. Nesse caso, o código dentro do bloco `else` é executado.
+
+6. `throw new EstudanteNotFoundException("Estudante com id " + id + " não encontrado!");`
+   - Aqui, uma exceção `EstudanteNotFoundException` é lançada. O `EstudanteNotFoundException` é uma exceção personalizada que pode ser usada para indicar que um estudante com o ID fornecido não foi encontrado. A mensagem da exceção incluirá o ID não encontrado.
+
+O uso de `Optional` nesse método é uma prática recomendada para evitar exceções `NullPointerException` ao buscar objetos que podem não existir no repositório. Quando o estudante não é encontrado, em vez de retornar `null`, ele lança uma exceção personalizada para indicar claramente o motivo da falha na busca. Isso ajuda a tornar o código mais robusto e seguro.
+
+### Passo 2 - Criado o método deletarEstudante() na Classe EstudanteService
+
+Agora com base no id do estudante para identificá-lo é possível executar o delete do estudante.
+
+```java
+public void deletarEstudante(Long id) throws EstudanteNotFoundException{
+
+   Estudante estudante = buscarEstudantePorId(id);
+   estudanteRepository.delete(estudante);
+}
+```
+
+1. `public void deletarEstudante(Long id) throws EstudanteNotFoundException {`
+   - O método `deletarEstudante` recebe um parâmetro `id` do tipo `Long`, que representa o identificador do estudante a ser excluído. O método também declara que pode lançar uma exceção `EstudanteNotFoundException`.
+
+2. `Estudante estudante = buscarEstudantePorId(id);`
+   - Ele chama o método `buscarEstudantePorId(id)` para obter o estudante com o ID fornecido. Isso é feito para garantir que o estudante com o ID exista antes de tentar excluí-lo. Se o estudante não for encontrado, o método `buscarEstudantePorId` lançará uma exceção `EstudanteNotFoundException`.
+
+3. `estudanteRepository.delete(estudante);`
+   - Após obter o estudante, ele utiliza um repositório chamado `estudanteRepository` para excluir o estudante. O repositório possui um método `delete` que permite excluir uma entidade (neste caso, um estudante) do banco de dados com base no objeto fornecido. Portanto, o estudante é removido do banco de dados.
+4. Observe que o método não precisa retornar o estudante excluído porque ele não é mais necessário após a exclusão. Em vez disso, o método lança uma exceção `EstudanteNotFoundException` se o estudante não for encontrado, o que é uma boa prática para indicar que a exclusão não foi bem-sucedida devido à ausência do estudante.
+
+Em resumo, esse método primeiro verifica se o estudante com o ID fornecido existe usando o método `buscarEstudantePorId`. Se o estudante existir, ele é excluído usando o repositório, caso contrário, é lançada uma exceção para indicar que o estudante não foi encontrado antes da tentativa de exclusão.
+
+### Passo 3 - Criado o método apagarEstudante() na Classe EstudanteController
+
+Agora vamos criar controlador que vai lidar com a exclusão do estudante com base no seu id fornecido.
+
+```java
+@GetMapping("/apagar/{id}")
+    public String apagarEstudante(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        try {
+            estudanteService.deletarEstudante(id);
+        } catch (EstudanteNotFoundException e) {
+            redirectAttributes.addFlashAttribute("mensagem", e.getMessage());
+        }
+      return "redirect:/";
+}
+```
+
+1. `@GetMapping("/apagar/{id}")`
+   - Esta é uma anotação `@GetMapping` que mapeia a URL "/apagar/{id}". O `{id}` é uma variável de caminho que pode receber um valor no URL. Isso significa que a URL "/apagar/algum_id" corresponderá a este método.
+
+2. `public String apagarEstudante(@PathVariable("id") Long id, RedirectAttributes redirectAttributes)`
+   - Este é o método controlador que lida com a solicitação GET para excluir um estudante. Ele recebe o valor do ID do estudante do URL como um parâmetro usando a anotação `@PathVariable`. Além disso, ele recebe um objeto `RedirectAttributes` que permite adicionar atributos para serem usados na página de redirecionamento.
+
+3. `try { ... } catch (EstudanteNotFoundException e) { ... }`
+   - O código dentro do bloco `try` tenta chamar o método `deletarEstudante(id)` do serviço `estudanteService` para excluir o estudante com o ID fornecido. Se uma exceção `EstudanteNotFoundException` for lançada durante a execução do método `deletarEstudante`, isso significa que o estudante não foi encontrado no banco de dados, e a exceção é capturada no bloco `catch`.
+
+4. `redirectAttributes.addFlashAttribute("mensagem", e.getMessage());`
+   - Dentro do bloco `catch`, é adicionado um atributo de flash chamado "mensagem" com a mensagem de exceção `e.getMessage()`. Os atributos de flash são usados para passar informações entre solicitações e são especialmente úteis quando você deseja mostrar uma mensagem de erro após um redirecionamento.
+
+5. `return "redirect:/";`
+   - Após a tentativa de exclusão, independentemente de ela ter sido bem-sucedida ou não, o método redireciona o usuário de volta para a página inicial ("/"). Qualquer mensagem de erro gerada é exibida na página inicial, graças ao uso de atributos de flash.
+
+Portanto, este script lida com a exclusão de estudantes com base no ID fornecido e redireciona o usuário de volta à página inicial, exibindo uma mensagem de erro se a exclusão não for bem-sucedida devido à não localização do estudante.
