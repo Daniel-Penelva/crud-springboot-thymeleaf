@@ -26,6 +26,8 @@ public class EstudanteController {
 
     private EstudanteService estudanteService;
 
+    // Acessar Aplicação - http://localhost:8080/
+    
     @GetMapping("/")
     public String listarEstudantes(Model model) {
         
@@ -71,5 +73,37 @@ public class EstudanteController {
         }
         return "redirect:/";
     }
-    
+
+
+    // Esse método vai capturar o id do estudante e redirecionar para a tela '/alterar-estudante' já carregado com os seus dados na tela.
+    @GetMapping("/editar/{id}")
+    public String carregarEstudanteFormParaAlterar(@PathVariable("id") Long id, RedirectAttributes redirectAttributes, Model model) {
+        try {
+            
+            Estudante estudante = estudanteService.buscarEstudantePorId(id);
+
+            model.addAttribute("editarEstudante", estudante);
+            return "/alterar-estudante";
+            
+        } catch (EstudanteNotFoundException e) {
+            redirectAttributes.addFlashAttribute("mensagem", e.getMessage());
+        }
+        return "redirect:/";
+    }
+
+
+    @PostMapping("/editar/{id}")
+    public String editarEstudante(@PathVariable("id") Long id, @ModelAttribute("editarEstudante") @Valid Estudante estudante,
+            BindingResult erros) {
+        
+        if(erros.hasErrors()){
+            estudante.setId(id);
+            return "/alterar-estudante";
+        }
+
+        estudanteService.alterarEstudante(estudante);
+
+        return "redirect:/";
+    }
+
 }

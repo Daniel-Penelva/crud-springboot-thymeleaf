@@ -43,4 +43,8 @@ public class EstudanteService {
         Estudante estudante = buscarEstudantePorId(id);
         estudanteRepository.delete(estudante);
     }
+
+    public Estudante alterarEstudante(Estudante estudante){
+        return estudanteRepository.save(estudante);
+    }
 }

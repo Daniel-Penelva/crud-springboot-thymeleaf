@@ -532,3 +532,100 @@ Agora vamos criar controlador que vai lidar com a exclusão do estudante com bas
    - Após a tentativa de exclusão, independentemente de ela ter sido bem-sucedida ou não, o método redireciona o usuário de volta para a página inicial ("/"). Qualquer mensagem de erro gerada é exibida na página inicial, graças ao uso de atributos de flash.
 
 Portanto, este script lida com a exclusão de estudantes com base no ID fornecido e redireciona o usuário de volta à página inicial, exibindo uma mensagem de erro se a exclusão não for bem-sucedida devido à não localização do estudante.
+
+# Implementando o Alterar Estudante
+
+### Passo 1 - Criado o método alterarEstudante() na Classe EstudanteService
+
+Primeiro vai ser criado um método para salvar os dados do estudante alterado no banco de dados.
+
+
+```java
+public Estudante alterarEstudante(Estudante estudante){
+    return estudanteRepository.save(estudante);
+}
+```
+
+- `public Estudante alterarEstudante(Estudante estudante)`: Este é um método é projetado para receber um objeto `Estudante` como argumento, que representa os novos dados do estudante que deseja atualizar. O objetivo deste método é atualizar as informações do estudante no banco de dados.
+
+- `estudanteRepository.save(estudante)`: Nesse trecho de código, o método `save` é chamado no `estudanteRepository`. O método `save` é usado para salvar ou atualizar um objeto no banco de dados. Se o objeto `estudante` já existe no banco de dados (com base em sua chave primária, no caso o ID), ou seja, a alteração é realizada no banco de dados, e o mesmo objeto `estudante` (agora atualizado) é retornado como resultado da operação e ele será atualizado com as informações fornecidas. Se o objeto `estudante` ainda não existe no banco de dados, ele será inserido como um novo registro.
+
+Em resumo, esse método `alterarEstudante` aceita um objeto `Estudante` com informações atualizadas, salva essas informações no banco de dados usando o repositório de estudante (`estudanteRepository`) e retorna o objeto `Estudante` atualizado. Isso é útil para realizar operações de atualização de registros no banco de dados, como alterar informações de um estudante existente.
+
+### Passo 2 - Criado o método carregarEstudanteFormParaAlterar() na Classe EstudanteController
+
+Próxima etapa está relacionado à funcionalidade de carregar um formulário para a edição de informações de um estudante. 
+
+```java
+@GetMapping("/editar/{id}")
+public String carregarEstudanteFormParaAlterar(@PathVariable("id") Long id, RedirectAttributes redirectAttributes, Model model) {
+    try {
+        Estudante estudante = estudanteService.buscarEstudantePorId(id);
+
+        model.addAttribute("editarEstudante", estudante);
+        return "/alterar-estudante";
+    } catch (EstudanteNotFoundException e) {
+        redirectAttributes.addFlashAttribute("mensagem", e.getMessage());
+    }
+    return "redirect:/";
+}
+```
+
+- `@GetMapping("/editar/{id")`: Essa anotação mapeia a URL `/editar/{id}`, onde `{id}` é uma variável de caminho (path variable) que será usada para identificar o ID do estudante que você deseja editar. Isso significa que quando você acessa essa URL, o método será executado.
+
+- `public String carregarEstudanteFormParaAlterar(@PathVariable("id") Long id, RedirectAttributes redirectAttributes, Model model)`: Este é um método que lida com a solicitação GET para editar um estudante. Ele espera receber três parâmetros:
+   1. `@PathVariable("id") Long id`: Este é um parâmetro de caminho que extrai o valor do `id` da URL. Ele será usado para identificar o estudante que você deseja editar.
+   2. `RedirectAttributes redirectAttributes`: Isso é usado para redirecionar mensagens ou atributos após a conclusão da operação.
+   3. `Model model`: Isso é usado para adicionar atributos ao modelo, que podem ser usados na página da web, no caso, no formulário de edição.
+
+- `Estudante estudante = estudanteService.buscarEstudantePorId(id)`: Aqui, o método `buscarEstudantePorId` do serviço é chamado para recuperar o estudante com o ID especificado. Se o estudante com esse ID for encontrado, ele é armazenado na variável `estudante`.
+
+- `model.addAttribute("editarEstudante", estudante)`: O objeto `estudante` é adicionado ao modelo com o nome "editarEstudante". Isso permite que as informações do estudante sejam acessadas na página do formulário de edição.
+
+- `return "/alterar-estudante"`: Após configurar o modelo com os dados do estudante, o método retorna uma string que corresponde ao nome da página ou do modelo Thymeleaf que deve ser renderizado. Neste caso, a página `alterar-estudante` será renderizada para permitir a edição do estudante.
+
+- No caso de ocorrer uma exceção `EstudanteNotFoundException`, o código no bloco `catch` será executado. Isso pode acontecer se o estudante com o ID especificado não for encontrado. Nesse caso, uma mensagem de erro é adicionada aos atributos de redirecionamento (`redirectAttributes`), e o usuário é redirecionado de volta para a página principal ("redirect:/").
+
+Em resumo, este script permite que os usuários acessem um formulário de edição para um estudante específico, identificado pelo seu ID. Se o estudante for encontrado, suas informações serão carregadas no formulário de edição. Se o estudante não for encontrado, o usuário receberá uma mensagem de erro.
+
+### Passo 3 - Criado o método carregarEstudanteFormParaAlterar() na Classe EstudanteController
+
+Essa etapa está relacionado com o processo de edição de um estudante.
+
+```java
+@PostMapping("/editar/{id}")
+public String editarEstudante(@PathVariable("id") Long id, @ModelAttribute("editarEstudante")
+ @Valid Estudante estudante, BindingResult erros) {
+    
+    if (erros.hasErrors()) {
+        estudante.setId(id);
+        return "/alterar-estudante";
+    }
+
+    estudanteService.alterarEstudante(estudante);
+
+    return "redirect:/";
+}
+```
+
+- `@PostMapping("/editar/{id}")`: Esta anotação mapeia uma solicitação POST para a URL `/editar/{id}`, onde `{id}` é um parâmetro de caminho que identifica o ID do estudante que está sendo editado.
+
+- `public String editarEstudante(@PathVariable("id") Long id, @ModelAttribute("editarEstudante") @Valid Estudante estudante, BindingResult erros)`: Este é o método responsável por processar a solicitação POST de edição de estudante. Ele recebe os seguintes parâmetros:
+
+   1. `@PathVariable("id") Long id`: Isso extrai o valor de `{id}` da URL, que é usado para identificar o estudante que está sendo editado.
+
+   2. `@ModelAttribute("editarEstudante") @Valid Estudante estudante`: Aqui, o objeto `estudante` é vinculado ao modelo pelo nome "editarEstudante". Essa anotação permite que você recupere os dados do formulário preenchido pelo usuário. O `@Valid` indica que a validação do modelo deve ser aplicada aos dados do estudante. Se ocorrerem erros de validação, eles serão armazenados no objeto `BindingResult`.
+
+   3. `BindingResult erros`: Isso é usado para coletar erros de validação, caso existam.
+
+- `if (erros.hasErrors())`: Aqui, o código verifica se há erros de validação nos dados do estudante. Se houver erros, o código dentro deste bloco será executado.
+
+- `estudante.setId(id)`: Se ocorrerem erros de validação, o ID do estudante é definido com o valor de `id`. Isso é feito para garantir que o ID do estudante não seja perdido durante o processo de edição.
+
+- `return "/alterar-estudante"`: Se ocorrerem erros de validação, o método retorna a página "alterar-estudante" para que o usuário possa corrigir os erros.
+
+- `estudanteService.alterarEstudante(estudante)`: Se não houver erros de validação, o serviço é chamado para alterar os dados do estudante com base nas informações fornecidas no objeto `estudante`. Isso é o que efetivamente realiza a edição do estudante.
+
+- `return "redirect:/"`: Após a edição bem-sucedida, o método redireciona o usuário de volta à página principal do aplicativo.
+
+Em resumo, esse script trata da edição de um estudante. Se houver erros de validação, o usuário será redirecionado de volta ao formulário de edição para corrigi-los. Caso contrário, as alterações serão salvas e o usuário será redirecionado para a página principal.
