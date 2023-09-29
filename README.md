@@ -386,7 +386,7 @@ O trecho de código HTML acima está associado ao método `listarEstudantes`.
 
 Em resumo, o trecho de código HTML fornecido percorre a lista de estudantes obtida no método `listarEstudantes` e exibe as informações dos estudantes em uma tabela na página. Se a lista estiver vazia, ele exibirá uma mensagem indicando que não há estudantes. Caso contrário, ele preencherá a tabela com os detalhes de cada estudante na lista.
 
-Classe `Optional`
+# Classe `Optional`
 
 A classe `Optional` faz parte do Java e foi introduzida nas versões mais recentes (Java 8) para ajudar a lidar com valores opcionais ou nulos de maneira mais segura e funcional. Ela é uma parte importante das bibliotecas de programação funcional introduzidas no Java. 
 
@@ -729,3 +729,9 @@ public String buscarEstudantes(Model model, @Param("nome") String nome) {
 6. `return "/lista-estudantes";`: Finalmente, o método retorna uma string que é interpretada como o nome da visualização (página HTML) que deve ser exibida após o processamento. Nesse caso, a visualização "lista-estudantes" será renderizada para mostrar os resultados da pesquisa.
 
 Resumindo, este método é responsável por receber um nome de pesquisa de um formulário HTML, pesquisar estudantes com base nesse nome usando o serviço `estudanteService`, adicionar a lista de estudantes aos atributos do modelo e, em seguida, retornar a visualização "lista-estudantes" para exibir os resultados da pesquisa. Se o nome não for fornecido (ou seja, for nulo), o usuário é redirecionado para a página inicial.
+
+---
+
+# Autor
+
+## Feito por `Daniel Penelva`
